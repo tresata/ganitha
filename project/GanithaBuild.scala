@@ -3,17 +3,18 @@ import sbt.Keys._
 import sbtassembly.Plugin._
 import sbtassembly.Plugin.AssemblyKeys._
 
-object GanitaBuild extends Build {
+object GanithaBuild extends Build {
 
   val sharedSettings = Project.defaultSettings ++ assemblySettings ++ Seq(
     organization := "com.tresata",
-    scalaVersion := "2.9.2",
+    scalaVersion := "2.10.3",
     retrieveManaged := true,
     retrievePattern := "[artifact](-[revision])(-[classifier]).[ext]",
     libraryDependencies ++= Seq(
-      "com.twitter" %% "scalding-core" % "0.8.6",
+      "com.twitter" %% "scalding-core" % "0.9.0rc4",
       "org.apache.hadoop" % "hadoop-core" % "1.0.4" % "provided",
-      "org.scalatest" %% "scalatest" % "1.8" % "test",
+      "cascading.kryo" % "cascading.kryo" % "0.4.6" % "compile",
+      "org.scalatest" %% "scalatest" % "1.9.2" % "test",
       "org.slf4j" % "slf4j-log4j12" % "1.6.1" % "test"
     ),
     resolvers ++= Seq(
@@ -21,8 +22,7 @@ object GanitaBuild extends Build {
       "releases"  at "http://oss.sonatype.org/content/repositories/releases",
       "Concurrent Maven Repo" at "http://conjars.org/repo",
       "Clojars Repository" at "http://clojars.org/repo",
-      "Twitter Maven" at "http://maven.twttr.com",
-      "Twitter SVN Maven" at "https://svn.twitter.biz/maven-public"
+      "Twitter Maven" at "http://maven.twttr.com"
     ),
     test in assembly := {},
     mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {

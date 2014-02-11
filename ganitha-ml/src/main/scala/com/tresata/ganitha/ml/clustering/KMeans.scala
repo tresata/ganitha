@@ -23,7 +23,7 @@ import com.tresata.ganitha.ml.util._
 import com.tresata.ganitha.ml.util.VectorImplicits._
 import com.tresata.ganitha.mahout.Implicits._
 import com.tresata.ganitha.mahout.VectorSerializer
-import com.tresata.ganitha.util.FunctionImplicits._ // change to com.twitter.scalding.FunctionImplicits
+import com.twitter.scalding.FunctionImplicits._
 
 import org.slf4j.LoggerFactory
 
@@ -269,7 +269,7 @@ class KMeans[VecType <: AnyRef](distFn: (VecType, VecType) => Double)(implicit h
 
       val tempTap1 = new TmpHfs(job)
       val samplingPipe = new Pipe("k-means++ sampling pipe")
-        .then(if (sampleSplitFactor > 1.15) (pipe: Pipe) => pipe.sample(1 / sampleSplitFactor) else identity[Pipe])
+        .thenDo(if (sampleSplitFactor > 1.15) (pipe: Pipe) => pipe.sample(1 / sampleSplitFactor) else identity[Pipe])
         .filter(idIn) { id: String => !clusterIDSeq.contains(id) }
         .using { new Random with Stateful }
         .map(() -> 'seed) { (rand: Random, _: Unit) => rand.nextDouble() }

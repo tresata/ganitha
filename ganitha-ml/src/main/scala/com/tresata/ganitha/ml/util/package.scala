@@ -108,7 +108,7 @@ object `package` {
     require(idField.size == 1, "Only specify one field for the vector id")
     dataPipe
       .project(idField.append(vectorFields))
-      .then((pipe: Pipe) => vectorizeFields(pipe))
+      .thenDo((pipe: Pipe) => vectorizeFields(pipe))
   }
 
   /**

@@ -13,6 +13,6 @@ class VectorizeJob(args: Args) extends Job(args) {
   val vectorFields = new Fields(args.list("features"): _*)
   val sinkTap = SequenceFile(args("vectors"), ('id, 'vector))
   vectorTap.read
-    .then((pipe: Pipe) => vectorizeFields(pipe, idField, vectorFields))
+    .thenDo((pipe: Pipe) => vectorizeFields(pipe, idField, vectorFields))
     .write(sinkTap)
 }

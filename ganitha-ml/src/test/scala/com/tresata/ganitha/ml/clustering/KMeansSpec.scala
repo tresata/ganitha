@@ -17,7 +17,11 @@ class KMeansSpec extends FunSpec {
   describe("A KMeans object") {
 
     it("should classify a set of four gaussian distributions") {
-      val dataPointsTap = new Hfs(new SequenceFile(('vectorid, 'vectorFeatures)), "test/data/fourgaussians_seqfile").asInstanceOf[HadoopTap]
+      // first vectorize the input and write to a temporary sequence file
+      com.twitter.scalding.Tool.main("com.tresata.ganitha.ml.util.VectorizeJob --hdfs --input %s --id id --features x y --vectors %s"
+        .format("test/data/fourgaussians/vectors.bsv", "tmp/fourgaussians_seqfile").split("\\s+"))
+
+      val dataPointsTap = new Hfs(new SequenceFile(('vectorid, 'vectorFeatures)), "tmp/fourgaussians_seqfile").asInstanceOf[HadoopTap]
       val assignmentTap = new Hfs(new TextDelimited(), "tmp/fourgaussians/vector_assignments.bsv", SinkMode.REPLACE).asInstanceOf[HadoopTap]
       val centroidsTap = new Hfs(new TextDelimited(), "tmp/fourgaussians/clusters.bsv", SinkMode.REPLACE).asInstanceOf[HadoopTap]
       val kmeans = new KMeans(distFn = StrDblMapVectorHelper.euclidean)

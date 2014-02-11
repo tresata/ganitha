@@ -178,10 +178,8 @@ object `package` {
 
     def seedCostPipe = new Pipe("seed cost pipe")
       .mapTo((idIn, vectorIn) -> 'cost) { vector: Named[VecType] => costForVector(vector) }
-      // .groupRandomly(NUM_MAPPERS) { _.sum[Double]('cost) } // TODO: Verify that this subsitution is ok.
-      // .groupAll { _.sum[Double]('cost) } // TODO: Verify that this subsitution is ok.
-      .groupRandomly(NUM_MAPPERS) { _.sum('cost) }
-      .groupAll { _.sum('cost) }
+      .groupRandomly(NUM_MAPPERS) { _.sum[Double]('cost) }
+      .groupAll { _.sum[Double]('cost) }
 
     flowConnector.connect(sourceTap, tempTap, seedCostPipe).complete()
 

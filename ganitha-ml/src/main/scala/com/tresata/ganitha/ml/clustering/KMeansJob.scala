@@ -11,7 +11,8 @@ class KMeansJob(args: Args) extends VectorizeJob(args) {
 }
 
 class KMeansSeqFileJob(args: Args) extends Job(args) {
-  override def run(implicit mode: Mode): Boolean = {
+  override def validate {}
+  override def run: Boolean = {
     require(mode.isInstanceOf[HadoopMode], "this job does not support local mode")
     def createTap(source: Source, readOrWrite: AccessMode): HadoopTap = source.createTap(readOrWrite)(mode).asInstanceOf[HadoopTap]
 

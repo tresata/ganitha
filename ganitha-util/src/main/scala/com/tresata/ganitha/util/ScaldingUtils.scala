@@ -32,9 +32,10 @@ object ScaldingUtils {
   def addToStrings(map: Map[AnyRef, AnyRef], key: String, updates: String*): Map[AnyRef, AnyRef] =
     map + (key -> addToStrings(map.get(key).map(_.toString), updates: _*))
 
-  private val ioSerVals = List[String]("org.apache.hadoop.io.serializer.WritableSerialization",
+  private val ioSerVals = List[String](
+    "org.apache.hadoop.io.serializer.WritableSerialization",
     "cascading.tuple.hadoop.TupleSerialization",
-    "com.twitter.scalding.serialization.KryoHadoop")
+    "com.twitter.chill.hadoop.KryoSerialization")
 
   /**
     * Returns a new config map with the proper defaults set for scalding to function.
@@ -44,6 +45,7 @@ object ScaldingUtils {
   def withScaldingDefaults(map: Map[AnyRef, AnyRef]): Map[AnyRef, AnyRef] = {
     map +
       ("io.serializations" -> addToStrings(map.get("io.serializations").map(_.toString), ioSerVals: _*)) +
+      ("com.twitter.chill.config.configuredinstantiator" -> "com.twitter.scalding.serialization.KryoHadoop") +
       ("cascading.flow.tuple.element.comparator" -> "com.twitter.scalding.IntegralComparator") +
       ("cascading.spill.threshold" -> map.getOrElse("cascading.spill.threshold", "100000")) +
       ("cascading.spill.map.threshold" -> map.getOrElse("cascading.spill.map.threshold", "100000")) +
@@ -56,6 +58,7 @@ object ScaldingUtils {
     */
   def setScaldingDefaults(conf: Configuration) {
     conf.set("io.serializations", addToStrings(Option[String](conf.get("io.serializations")), ioSerVals: _*))
+    conf.set("com.twitter.chill.config.configuredinstantiator", "com.twitter.scalding.serialization.KryoHadoop")
     conf.set("cascading.flow.tuple.element.comparator", "com.twitter.scalding.IntegralComparator")
     conf.set("cascading.spill.threshold", conf.get("cascading.spill.threshold", "100000"))
     conf.set("cascading.spill.map.threshold", conf.get("cascading.spill.map.threshold", "100000"))
