@@ -19,7 +19,7 @@ import com.twitter.scalding.Dsl._
 import com.tresata.ganitha.ml.util._
 import com.tresata.ganitha.ml.util.VectorImplicits._
 import com.tresata.ganitha.util._
-import com.tresata.ganitha.util.FunctionImplicits._ // change to com.twitter.scalding.FunctionImplicits
+import com.twitter.scalding.FunctionImplicits._
 
 import org.slf4j.{ Logger, LoggerFactory }
 

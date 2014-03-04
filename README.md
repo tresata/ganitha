@@ -112,6 +112,6 @@ This will use the `id` columns as the vector id, and will encode the coordinates
 
 ## License
 
-Copyright 2013 Tresata, Inc.
+Copyright 2014 Tresata, Inc.
 
 Licensed under the Apache License, Version 2.0: http://www.apache.org/licenses/LICENSE-2.0
