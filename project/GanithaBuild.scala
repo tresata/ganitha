@@ -8,6 +8,7 @@ object GanithaBuild extends Build {
   val sharedSettings = Project.defaultSettings ++ assemblySettings ++ Seq(
     organization := "com.tresata",
     scalaVersion := "2.9.3",
+    version := "0.1-SNAPSHOT",
     crossScalaVersions := Seq("2.9.3", "2.10.3"),
     retrieveManaged := true,
     retrievePattern := "[artifact](-[revision])(-[classifier]).[ext]",
@@ -24,6 +25,9 @@ object GanithaBuild extends Build {
       "Concurrent Maven Repo" at "http://conjars.org/repo",
       "Clojars Repository" at "http://clojars.org/repo",
       "Twitter Maven" at "http://maven.twttr.com"
+    ) ++ Seq(
+      "tresata-snapshots" at "http://server01:8080/archiva/repository/snapshots",
+      "tresata-releases" at "http://server01:8080/archiva/repository/internal"
     ),
     test in assembly := {},
     mergeStrategy in assembly <<= (mergeStrategy in assembly) { (old) => {
@@ -31,7 +35,17 @@ object GanithaBuild extends Build {
       case s if s.endsWith("project.clj") => MergeStrategy.concat
       case s if s.endsWith(".html") => MergeStrategy.last
       case x => old(x)
-    }}
+    }},
+    publishTo <<= version { (v: String) =>
+      val tresata = "http://server01:8080/archiva/repository/"
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("tresata-snapshots" at tresata + "snapshots")
+      else
+        Some("tresata-releases"  at tresata + "internal")
+    },
+    credentials += Credentials(Path.userHome / ".m2" / "credentials_internal"),
+    credentials += Credentials(Path.userHome / ".m2" / "credentials_snapshots"),
+    credentials += Credentials(Path.userHome / ".m2" / "credentials_proxy")
   )
 
   lazy val ganitha = Project(
