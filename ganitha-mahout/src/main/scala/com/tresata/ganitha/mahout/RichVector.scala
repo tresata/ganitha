@@ -68,4 +68,10 @@ class RichVector(val vector : Vector) extends Iterable[Double] {
 
   def vectorMap(v : Vector)(f : (Double, Double) => Double) = copy.assign(v, f)
 
+  def vectorMapNonZero(f : Double => Double) = {
+    val newVector = vector.copy
+    newVector.updateMany(vector.nonZero.map{ case(k, v) => (k, f(v)) })
+    newVector
+  }
+
 }

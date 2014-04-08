@@ -102,10 +102,10 @@ class KMeans[VecType <: AnyRef](distFn: (VecType, VecType) => Double)(implicit h
       logger.info("kmeans clusters changed:    {}", changes._1)
       logger.info("kmeans clusters unchanged:  {}", changes._2)
       logger.debug("Previous cluster centers:")
-      for ((id, vector) <- clusterSeq) { logger.debug("{}: {}", id, helper.toString(vector)) }
+      for ((id, vector) <- clusterSeq) { logger.debug("{}: {}", id: Any, helper.toString(vector)) }
 
       logger.info("Cluster centers:")
-      for ((id, vector) <- nextClusterSeq) { logger.info("{}: {}", id, helper.toString(vector)) }
+      for ((id, vector) <- nextClusterSeq) { logger.info("{}: {}", id: Any, helper.toString(vector)) }
 
       i += 1
     } while (changes._1 > 0 && i <= maxIter)
@@ -309,7 +309,7 @@ class KMeans[VecType <: AnyRef](distFn: (VecType, VecType) => Double)(implicit h
       clusterCost = seedCost(clusterBuffer, fullSetTap, fieldsIn, fieldsOut, distFn, job)
 
       logger.debug("k-means++ iteration {}/{}", i, (k - 1))
-      logger.debug("cluster chosen : {} = {}", addedCluster._1, helper.toString(addedCluster._2))
+      logger.debug("cluster chosen : {} = {}", addedCluster._1: Any, helper.toString(addedCluster._2))
       logger.debug("cluster seed list now has size {}", clusterBuffer.size)
       logger.debug("cluster cost is now {}", clusterCost)
     }
