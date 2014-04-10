@@ -13,12 +13,11 @@ import com.twitter.scalding.Dsl._
 import com.tresata.ganitha.util._
 import com.tresata.ganitha.ml.util._
 import com.tresata.ganitha.mahout.Implicits._
-import com.tresata.ganitha.mahout.VectorSerializer
 import com.twitter.scalding.FunctionImplicits._
 
 import org.slf4j.LoggerFactory
 
-abstract class NaiveBayesModel[VecType <: AnyRef] extends ClassificationModel {
+abstract class NaiveBayesModel[VecType] extends ClassificationModel {
   /**
     * Returns the label given to the input vector by the maximum a posteriori probability.
     *
@@ -46,7 +45,7 @@ abstract class NaiveBayesModel[VecType <: AnyRef] extends ClassificationModel {
   * @param pi Seq[Named[Double]] containing labels and their prior probabilities
   * @param theta Seq[Named[VecType]] containing labels and their log feature weights vectors
   */
-class MultinomialNBModel[VecType <: AnyRef](val pi: Seq[Named[Double]], val theta: Seq[Named[VecType]])
+class MultinomialNBModel[VecType](val pi: Seq[Named[Double]], val theta: Seq[Named[VecType]])
 (implicit helper: VectorHelper[VecType]) extends NaiveBayesModel[VecType] {
   assert(pi.size == theta.size, "Number of prior probabilities must equal number of weight vectors")
 
@@ -81,7 +80,7 @@ object MultinomialNBModel {
   * @param pi Seq[Named[Double]] containing labels and their prior probabilities
   * @param theta Seq[Named[VecType]] containing labels and their log feature weights vectors
   */
-class BernoulliNBModel[VecType <: AnyRef](val pi: Seq[Named[Double]], val theta: Seq[Named[VecType]])
+class BernoulliNBModel[VecType](val pi: Seq[Named[Double]], val theta: Seq[Named[VecType]])
 (implicit helper: DenseVectorHelper[VecType]) extends NaiveBayesModel[VecType] {
   assert(pi.size == theta.size, "Number of prior probabilities must equal number of weight vectors")
   assert(theta.forall{ case(l, v) => helper.iterator(v).count(_ > 1.0) == 0 }, "weights vector values should be less than 1.0")
@@ -121,7 +120,7 @@ object BernoulliNBModel {
   * @param mu Seq[Named[VecType]] containing labels and their mean vectors
   * @param sigma Seq[Named[VecType]] containing labels and their variance vectors
   */
-class GaussianNBModel[VecType <: AnyRef](val pi: Seq[Named[Double]], val mu: Seq[Named[VecType]], val sigma: Seq[Named[VecType]])
+class GaussianNBModel[VecType](val pi: Seq[Named[Double]], val mu: Seq[Named[VecType]], val sigma: Seq[Named[VecType]])
 (implicit helper: DenseVectorHelper[VecType]) extends NaiveBayesModel[VecType] {
   assert(pi.size == mu.size, "Number of prior probabilities must equal number of mu vectors")
   assert(pi.size == sigma.size, "Number of prior probabilities must equal number of sigma vectors")
@@ -211,13 +210,12 @@ object MultinomialNB {
     * @param jobConf JobConf containing configurations
     * @return MultinomialNBModel containing prior probabilities and feature weights vectors for each label
     */
-  def modelFromTap[VecType <: AnyRef](modelTap: HadoopTap, fs: Fields = ('label, 'pi, 'theta), jobConf: JobConf = new JobConf)
+  def modelFromTap[VecType](modelTap: HadoopTap, fs: Fields = ('label, 'pi, 'theta), jobConf: JobConf = new JobConf)
   (implicit helper: VectorHelper[VecType]): MultinomialNBModel[VecType] = {
     assert(fs.size == 3, "Must specify exactly three Field names for the labels, prior probabilities and feature weights vectors")
 
     val job = new JobConf(jobConf)
     ScaldingUtils.setScaldingDefaults(job)
-    VectorSerializer.register(job)
     val nbModel = ScaldingUtils.toSeq[(String, Double, VecType)](modelTap, job)
     val pi: Seq[Named[Double]] = nbModel.map{ case(label, pi, theta) => (label, pi) }
     val theta: Seq[Named[VecType]] = nbModel.map{ case(label, pi, theta) => (label, theta) }
@@ -277,13 +275,12 @@ object BernoulliNB {
     * @param jobConf JobConf containing configurations
     * @return BernoulliNBModel containing prior probabilities and feature weights vectors for each label
     */
-  def modelFromTap[VecType <: AnyRef](modelTap: HadoopTap, fs: Fields = ('label, 'pi, 'theta), jobConf: JobConf = new JobConf)
+  def modelFromTap[VecType](modelTap: HadoopTap, fs: Fields = ('label, 'pi, 'theta), jobConf: JobConf = new JobConf)
   (implicit helper: DenseVectorHelper[VecType]): BernoulliNBModel[VecType] = {
     assert(fs.size == 3, "Must specify exactly three Field names for the labels, prior probabilities and feature weights vectors")
 
     val job = new JobConf(jobConf)
     ScaldingUtils.setScaldingDefaults(job)
-    VectorSerializer.register(job)
     val nbModel = ScaldingUtils.toSeq[(String, Double, VecType)](modelTap, job)
     val pi: Seq[Named[Double]] = nbModel.map{ case(label, pi, theta) => (label, pi) }
     val theta: Seq[Named[VecType]] = nbModel.map{ case(label, pi, theta) => (label, theta) }
@@ -342,13 +339,12 @@ object GaussianNB {
     * @param jobConf JobConf containing configurations
     * @return GaussianNBModel containing prior probabilities and mean/variance vectors for each label
     */
-  def modelFromTap[VecType <: AnyRef](modelTap: HadoopTap, fs: Fields = ('label, 'pi, 'mu, 'sigma), jobConf: JobConf = new JobConf)
+  def modelFromTap[VecType](modelTap: HadoopTap, fs: Fields = ('label, 'pi, 'mu, 'sigma), jobConf: JobConf = new JobConf)
   (implicit helper: DenseVectorHelper[VecType]): GaussianNBModel[VecType] = {
     assert(fs.size == 4, "Must specify exactly four Field names for the labels, prior probabilities and mean/variance vectors")
 
     val job = new JobConf(jobConf)
     ScaldingUtils.setScaldingDefaults(job)
-    VectorSerializer.register(job)
     val nbModel = ScaldingUtils.toSeq[(String, Double, VecType, VecType)](modelTap, job)
     val pi: Seq[Named[Double]] = nbModel.map{ case(label, pi, mu, sigma) => (label, pi) }
     val mu: Seq[Named[VecType]] = nbModel.map{ case(label, pi, mu, sigma) => (label, mu) }

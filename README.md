@@ -113,7 +113,7 @@ Ganitha uses [sbt](http://www.scala-sbt.org/) for generating builds. To create a
 To run K-Means clustering on a test set of data, stored as a comma-separated values file with a header (in this example, with a file on Hadoop named *100kPoints.csv* with the header (```id,x,y```), run the following command from within the ganitha directory:
 
 ```
-hadoop jar ganitha-ml/target/scala-2.9.2/ganitha-ml-assembly-0.1-SNAPSHOT.jar com.twitter.scalding.Tool com.tresata.ganitha.ml.clustering.KMeansJob --hdfs --vecType StrDblMapVector --distFn euclidean --k 100 --id id --features x y --input 100kPoints.csv --vectors 100kVectors --vectorOutput vectorAssignments --clusterOutput centroids
+hadoop jar ganitha-ml/target/scala-2.10/ganitha-ml-assembly-0.1-SNAPSHOT.jar com.twitter.scalding.Tool com.tresata.ganitha.ml.clustering.KMeansJob --hdfs --vecType StrDblMapVector --distFn euclidean --k 100 --id id --features x y --input 100kPoints.csv --vectors 100kVectors --vectorOutput vectorAssignments --clusterOutput centroids
 ```
 
 This will use the `id` columns as the vector id, and will encode the coordinates(`x` and `y`) as ```Map[String, Double]``` vectors (using the ```StrDblMapVector``` VectorHelper), under a Euclidean space, and run the algorithm on *k*=100 clusters. The output is written to a ```vectorAssignments``` file on Hadoop, with the cluster centroids written to ```centroids```. The `vectors` argument specifies a location for the Cascading Sequence file that serves as the input for ```KMeans```.

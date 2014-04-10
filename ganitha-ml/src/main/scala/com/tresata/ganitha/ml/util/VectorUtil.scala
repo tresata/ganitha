@@ -61,15 +61,78 @@ object MahoutVectorHelper extends DenseVectorHelper[MahoutVector] {
   def cosine(v1: MahoutVector, v2: MahoutVector): Double = {
     val dotProd = v1.dot(v2)
     if (dotProd < 0.00000001) 1.0 // don't waste calculations on orthogonal vectors or 0
-    val denom = v1.norm(2) * v2.norm(2);
+    val denom = v1.norm(2) * v2.norm(2)
     1.0 - abs(dotProd / denom)
   }
   def iterator(v: MahoutVector) = v.toIterator
 }
 
+import breeze.linalg.{ Vector => BreezeVector }
+object BreezeVectorHelper extends DenseVectorHelper[BreezeVector[Double]] {
+  def plus(v1: BreezeVector[Double], v2: BreezeVector[Double]) = v1 + v2
+  def scale(v: BreezeVector[Double], k: Double) = v :* k
+  def toString(v: BreezeVector[Double]) = v.toString
+  def size(v: BreezeVector[Double]) = v.size
+  def sum(v: BreezeVector[Double]) = v.sum
+  def dot(v1: BreezeVector[Double], v2: BreezeVector[Double]) = v1.dot(v2)
+  def map(v: BreezeVector[Double], f: Double => Double) = v.map(f)
+  def l1Distance(v1: BreezeVector[Double], v2: BreezeVector[Double]): Double = (v1 - v2).norm(1)
+  def euclidean(v1: BreezeVector[Double], v2: BreezeVector[Double]): Double = (v1 - v2).norm(2)
+  def cosine(v1: BreezeVector[Double], v2: BreezeVector[Double]): Double = {
+    val dotProd = v1.dot(v2)
+    if (dotProd < 0.00000001) 1.0 // don't waste calculations on orthogonal vectors or 0
+    val denom = v1.norm(2) * v2.norm(2)
+    1.0 - abs(dotProd / denom)
+  }
+  def iterator(v: BreezeVector[Double]) = v.iterator.map(_._2)
+}
+
+import org.jblas.{ DoubleMatrix => JblasVector }
+object JblasVectorHelper extends DenseVectorHelper[JblasVector] {
+  def plus(v1: JblasVector, v2: JblasVector) = v1.add(v2)
+  def scale(v: JblasVector, k: Double) = { val v2 = new JblasVector(v.data.clone); v2.mmuli(k) }
+  def toString(v: JblasVector) = v.toString
+  def size(v: JblasVector) = v.rows
+  def sum(v: JblasVector) = v.sum
+  def dot(v1: JblasVector, v2: JblasVector) = v1.dot(v2)
+  def map(v: JblasVector, f: Double => Double) = new JblasVector(v.data.clone.map(f))
+  def l1Distance(v1: JblasVector, v2: JblasVector): Double = v1.distance1(v2)
+  def euclidean(v1: JblasVector, v2: JblasVector): Double = v1.distance2(v2)
+  def cosine(v1: JblasVector, v2: JblasVector): Double = {
+    val dotProd = v1.dot(v2)
+    if (dotProd < 0.00000001) 1.0 // don't waste calculations on orthogonal vectors or 0
+    val denom = v1.norm2 * v2.norm2
+    1.0 - abs(dotProd / denom)
+  }
+  def iterator(v: JblasVector) = v.data.iterator
+}
+
+import org.saddle.{ Vec => SaddleVector }
+object SaddleVectorHelper extends DenseVectorHelper[SaddleVector[Double]] {
+  def plus(v1: SaddleVector[Double], v2: SaddleVector[Double]) = v1 + v2
+  def scale(v: SaddleVector[Double], k: Double) = v * k
+  def toString(v: SaddleVector[Double]) = v.toString.trim.replaceAll("\n", " ")
+  def size(v: SaddleVector[Double]) = v.contents.size
+  def sum(v: SaddleVector[Double]) = v.sum
+  def dot(v1: SaddleVector[Double], v2: SaddleVector[Double]) = v1 dot v2
+  def map(v: SaddleVector[Double], f: Double => Double) = v.map(f)
+  def l1Distance(v1: SaddleVector[Double], v2: SaddleVector[Double]): Double = v1.contents.zip(v2.contents).map{ case(x1, x2) => abs(x1 - x2) }.sum
+  def euclidean(v1: SaddleVector[Double], v2: SaddleVector[Double]): Double = sqrt(v1.contents.zip(v2.contents).map{ case(x1, x2) => pow(x1 - x2, 2) }.sum)
+  def cosine(v1: SaddleVector[Double], v2: SaddleVector[Double]): Double = {
+    val dotProd = v1 dot v2
+    if (dotProd < 0.00000001) 1.0 // don't waste calculations on orthogonal vectors or 0
+    val denom = sqrt(v1.contents.map{ x => pow(x, 2) }.sum) * sqrt(v2.contents.map{ x => pow(x, 2) }.sum)
+    1.0 - abs(dotProd / denom)
+  }
+  def iterator(v: SaddleVector[Double]) = v.contents.iterator
+}
+
 object VectorImplicits {
   implicit val strDblMapVectorHelper: VectorHelper[StrDblMapVector] = StrDblMapVectorHelper
   implicit val mahoutVectorHelper: DenseVectorHelper[MahoutVector] = MahoutVectorHelper
+  implicit val breezeVectorHelper: DenseVectorHelper[BreezeVector[Double]] = BreezeVectorHelper
+  implicit val jblasVectorHelper: DenseVectorHelper[JblasVector] = JblasVectorHelper
+  implicit val saddleVectorHelper: DenseVectorHelper[SaddleVector[Double]] = SaddleVectorHelper
 }
 
 // Map-Vector distance functions
