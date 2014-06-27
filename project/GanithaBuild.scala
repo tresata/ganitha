@@ -11,7 +11,7 @@ object GanithaBuild extends Build {
     retrieveManaged := true,
     retrievePattern := "[artifact](-[revision])(-[classifier]).[ext]",
     libraryDependencies ++= Seq(
-      "com.twitter" %% "scalding-core" % "0.9.0rc4",
+      "com.twitter" %% "scalding-core" % "0.9.1",
       "org.apache.hadoop" % "hadoop-core" % "1.0.4" % "provided",
       "cascading.kryo" % "cascading.kryo" % "0.4.6" % "compile",
       "org.scalatest" %% "scalatest" % "1.9.2" % "test",
