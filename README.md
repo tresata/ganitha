@@ -2,7 +2,7 @@
 
 Tresata is proud to release *Ganitha*, our first open-source library. Ganitha (derived from the Sanskrit word for mathematics, or science of computation) is a [Scalding](https://github.com/twitter/scalding) library with a focus on machine-learning and statistical analysis.
 
-The first two pieces to be open-sourced are our integration of [Mahout](https://github.com/apache/mahout) vectors into Scalding, and our clustering (K-Means) implementation. We plan to add more later.
+The current pieces to be open-sourced are our integration of [Mahout](https://github.com/apache/mahout) vectors into Scalding, our clustering (K-Means) implementation, and Naive-Bayes classifiers.
 
 ## Ganitha-Mahout
 
@@ -78,6 +78,14 @@ To make mahout vectors usable in Scala/Scalding we did the following:
   VectorSerializer.register(config)
   ```
 
+## Naive-Bayes classifying
+
+A [Naive-Bayes classifier](http://en.wikipedia.org/wiki/Naive_Bayes_classifier) is a probabilistic classifier used in machine-learning that involves the application of [Bayes' theorem](http://en.wikipedia.org/wiki/Bayes%27_theorem). The underlying model is "naive" because of the assumption that the attributes are conditionally independent of each other. Naive-Bayes learning is suprisingly effective in a wide range of applications, given the simplifying assumption of feature independence. Though not as powerful as decision-tree learning, it is considerably less computationally complex than many other forms of classifiers, and in many cases, the naive assumption has little impact on the quality of predictions.
+
+Ganitha supplies three of the more popular forms of Naive-Bayes classifiers: Gaussian, Multinomial, and Bernoulli. In gaussian Naive-Bayes, a type of classifier used for continuous data, we are making the assumption that the features associated with each class lie along a normal distribution. In a multinomial or Bernoulli event model, we are dealing with discrete features, a common example being the classification of a document given the presence of words (features) in the text. In this case, each word has a score assigned to it for each label, or class. In multinomial Naive-Bayes, each feature vector relates to the term frequency of the words found in the document or class. We make the 'bag-of-words' assumption, in which documents are represented as a multiset of words, disregarding grammar or word order. In Bernoulli Naive-Bayes, features represent binary occurences, and in this classification model, the absence of a word/feature has an effect on the calculated probabilities.
+
+Each classifier consists of a training phase, where an ```NBModel``` is constructed from the training set of data, and a classifying, or predicting, phase. In the classifying phase, each data point that is to be classified is given a probability (in this case a [log probability](http://en.wikipedia.org/wiki/Log_probability) is used) for each label, and the label with the highest, or *maximum a posteriori* probability is assigned to the data point.
+
 ## K-Means clustering
 
 [K-means clustering](http://en.wikipedia.org/wiki/K-means_clustering) consists of partitioning data points into k 'clusters' where each point belongs to the cluster with the nearest mean. The process of refining the centers of the clusters is commonly known as [Lloyd's algorithm](http://en.wikipedia.org/wiki/Lloyd%27s_algorithm), however there exist heuristic algorithms to seed the initial selection of cluster centers in order to improve the rate of convergence of Lloyd's algorithm. [K-Means++](http://en.wikipedia.org/wiki/K-means%2B%2B) offers an improvement over random initial selection, and more recently, K-Means|| offers an initialization technique that greatly cuts down on the number of iterations needed to determine initial clusters, a very desirable optimization in Hadoop applications, where significant overhead is involved in each iteration.
@@ -105,7 +113,7 @@ Ganitha uses [sbt](http://www.scala-sbt.org/) for generating builds. To create a
 To run K-Means clustering on a test set of data, stored as a comma-separated values file with a header (in this example, with a file on Hadoop named *100kPoints.csv* with the header (```id,x,y```), run the following command from within the ganitha directory:
 
 ```
-hadoop jar ganitha-ml/target/scala-2.9.2/ganitha-ml-assembly-0.1-SNAPSHOT.jar com.twitter.scalding.Tool com.tresata.ganitha.ml.clustering.KMeansJob --hdfs --vecType StrDblMapVector --distFn euclidean --k 100 --id id --features x y --input 100kPoints.csv --vectors 100kVectors --vectorOutput vectorAssignments --clusterOutput centroids
+hadoop jar ganitha-ml/target/scala-2.10/ganitha-ml-assembly-0.1-SNAPSHOT.jar com.twitter.scalding.Tool com.tresata.ganitha.ml.clustering.KMeansJob --hdfs --vecType StrDblMapVector --distFn euclidean --k 100 --id id --features x y --input 100kPoints.csv --vectors 100kVectors --vectorOutput vectorAssignments --clusterOutput centroids
 ```
 
 This will use the `id` columns as the vector id, and will encode the coordinates(`x` and `y`) as ```Map[String, Double]``` vectors (using the ```StrDblMapVector``` VectorHelper), under a Euclidean space, and run the algorithm on *k*=100 clusters. The output is written to a ```vectorAssignments``` file on Hadoop, with the cluster centroids written to ```centroids```. The `vectors` argument specifies a location for the Cascading Sequence file that serves as the input for ```KMeans```.

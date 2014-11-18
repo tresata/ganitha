@@ -22,7 +22,7 @@ import com.twitter.scalding.Dsl._
   * Provides common scalding classes and functions used for machine-learning algorithms.
   */
 object `package` {
-  type StrDblMapVector = Map[String, Double]
+  case class StrDblMapVector(cardinality: Int, mapping: Map[String, Double])
   type Named[Vector] = (String, Vector)
 
   def toNamedSeq[VecType](vectorSeq: Seq[VecType]): Seq[Named[VecType]] =
@@ -43,7 +43,7 @@ object `package` {
     val flowConnector = new HadoopFlowConnector(ScaldingUtils.toMap(job).asJava)
     val tempTap = new TmpHfs(job)
     val countPipe = new Pipe("count")
-    val flow = flowConnector.connect(vectorTap, tempTap, countPipe)
+    val flow = flowConnector.connect(vectorTap, tempTap.asInstanceOf[HadoopTap], countPipe)
     flow.complete()
     flow.getFlowStats.getCounterValue("cascading.flow.SliceCounters", "Tuples_Written")
   }
@@ -74,12 +74,12 @@ object `package` {
     iter.close
     collector.close
 
-    reIndexedTap
+    reIndexedTap.asInstanceOf[HadoopTap]
   }
 
   /**
-    * Returns a Pipe that converts the first Field into an id, and converts the other fields into a single String -> Double
-    * Map, using the field names for keys. This method expects a header to establish the keys for the Map.
+    * Returns a Pipe that converts the first Field into an id, and converts the other fields into a StrDblMapVector,
+    * using the field names for keys. This method expects a header to establish the keys for the Map.
     *
     * @param dataPipe Pipe containing the fields and values to convert into String, Double Maps
     */
@@ -91,13 +91,13 @@ object `package` {
           val keys = x.getFields.iterator.asScala.drop(1)
           val values = for (item <- x.getTuple.iterator.asScala.drop(1)) yield Tuples.toDouble(item)
           val vectorMap = Map() ++ (for ((key, value) <- keys zip values) yield (key.toString, value))
-          (id, vectorMap)
+          (id, new StrDblMapVector(vectorMap.size, vectorMap))
         }
       }
   }
 
   /**
-    * Returns a Pipe that converts the first Field into an id, and converts the other fields into a single String -> Double Map,
+    * Returns a Pipe that converts the first Field into an id, and converts the other fields into a StrDblMapVector,
     * using the field names for keys. This method expects a header to establish the keys for the Map.
     *
     * @param dataPipe Pipe containing the fields and values to convert into String, Double Maps
