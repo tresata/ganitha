@@ -8,6 +8,7 @@ object GanithaBuild extends Build {
   val sharedSettings = Project.defaultSettings ++ assemblySettings ++ Seq(
     organization := "com.tresata",
     scalaVersion := "2.10.4",
+    version := "0.1",
     retrieveManaged := true,
     retrievePattern := "[artifact](-[revision])(-[classifier]).[ext]",
     libraryDependencies ++= Seq(

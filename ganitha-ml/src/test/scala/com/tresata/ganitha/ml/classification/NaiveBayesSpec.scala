@@ -44,7 +44,7 @@ class GaussianNBSpec extends FunSpec {
       val nbOutputTap = new Hfs(new CSequenceFile(), "tmp/iris/gnb_output_mahout").asInstanceOf[HadoopTap]
       val nbOutput = ScaldingUtils.toSeq[(String, MahoutVector, String)](nbOutputTap, job).map{ case(before, v, after) => (before, after) }
       val ratioCorrect = nbOutput.count{ case(trueLabel, nbLabel) => trueLabel == nbLabel } / nbOutput.size.toDouble
-      println(ratioCorrect * 100 + "% predications correct")
+      println(ratioCorrect * 100 + "% predictions correct")
       assert(ratioCorrect >= .9, ratioCorrect * 100 + "% correctness not above 90% threshold")
     }
 
@@ -61,7 +61,7 @@ class GaussianNBSpec extends FunSpec {
       val nbOutputTap = new Hfs(new CSequenceFile(), "tmp/iris/gnb_output_jblas").asInstanceOf[HadoopTap]
       val nbOutput = ScaldingUtils.toSeq[(String, JblasVector, String)](nbOutputTap, job).map{ case(before, v, after) => (before, after) }
       val ratioCorrect = nbOutput.count{ case(trueLabel, nbLabel) => trueLabel == nbLabel } / nbOutput.size.toDouble
-      println(ratioCorrect * 100 + "% predications correct")
+      println(ratioCorrect * 100 + "% predictions correct")
       assert(ratioCorrect >= .9, ratioCorrect * 100 + "% correctness not above 90% threshold")
     }
 
@@ -79,7 +79,7 @@ class GaussianNBSpec extends FunSpec {
       val nbOutputTap = new Hfs(new CSequenceFile(), "tmp/iris/gnb_output_breeze").asInstanceOf[HadoopTap]
       val nbOutput = ScaldingUtils.toSeq[(String, BreezeVector[Double], String)](nbOutputTap, job).map{ case(before, v, after) => (before, after) }
       val ratioCorrect = nbOutput.count{ case(trueLabel, nbLabel) => trueLabel == nbLabel } / nbOutput.size.toDouble
-      println(ratioCorrect * 100 + "% predications correct")
+      println(ratioCorrect * 100 + "% predictions correct")
       assert(ratioCorrect >= .9, ratioCorrect * 100 + "% correctness not above 90% threshold")
     }
 
@@ -96,7 +96,7 @@ class GaussianNBSpec extends FunSpec {
       val nbOutputTap = new Hfs(new CSequenceFile(), "tmp/iris/gnb_output_saddle").asInstanceOf[HadoopTap]
       val nbOutput = ScaldingUtils.toSeq[(String, SaddleVector[Double], String)](nbOutputTap, job).map{ case(before, v, after) => (before, after) }
       val ratioCorrect = nbOutput.count{ case(trueLabel, nbLabel) => trueLabel == nbLabel } / nbOutput.size.toDouble
-      println(ratioCorrect * 100 + "% predications correct")
+      println(ratioCorrect * 100 + "% predictions correct")
       assert(ratioCorrect >= .9, ratioCorrect * 100 + "% correctness not above 90% threshold")
     }
 
