@@ -66,7 +66,6 @@ class GaussianNBSpec extends FunSpec {
     }
 
     it("should train and classify a set of BreezeVectors from a file") {
-      pending
       // read training set vectors into Naive-Bayes model
       com.twitter.scalding.Tool.main("com.tresata.ganitha.ml.classification.GaussianNBTrainingTestJob --hdfs --input %s --output %s --vectype breeze"
         .format("test/data/iris/iris_train.csv", "tmp/iris/gnb_model_breeze").split("\\s+"))

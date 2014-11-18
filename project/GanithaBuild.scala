@@ -8,18 +8,18 @@ object GanithaBuild extends Build {
   val sharedSettings = Project.defaultSettings ++ assemblySettings ++ Seq(
     organization := "com.tresata",
     scalaVersion := "2.10.4",
-    version := "0.1",
+    version := "0.2",
     retrieveManaged := true,
     retrievePattern := "[artifact](-[revision])(-[classifier]).[ext]",
     libraryDependencies ++= Seq(
-      "com.twitter" %% "scalding-core" % "0.9.1",
+      "com.twitter" %% "scalding-core" % "0.12.0rc4",
       "org.apache.hadoop" % "hadoop-core" % "1.0.4" % "provided",
       "cascading.kryo" % "cascading.kryo" % "0.4.6" % "compile",
-      "org.scalatest" %% "scalatest" % "1.9.2" % "test",
-      "org.slf4j" % "slf4j-log4j12" % "1.6.1" % "test",
-      "org.scalanlp" % "breeze_2.10" % "0.7" % "provided",
+      "org.scalatest" %% "scalatest" % "2.2.0" % "test",
+      "org.slf4j" % "slf4j-log4j12" % "1.7.5" % "test",
+      "org.scalanlp" % "breeze_2.10" % "0.9" % "provided",
       "org.jblas" % "jblas" % "1.2.3" % "provided",
-      "org.scala-saddle" % "saddle-core_2.10" % "1.3.2" % "provided"
+      "org.scala-saddle" % "saddle-core_2.10" % "1.3.3" % "provided"
     ),
     resolvers ++= Seq(
       "snapshots" at "http://oss.sonatype.org/content/repositories/snapshots",
@@ -34,7 +34,8 @@ object GanithaBuild extends Build {
       case s if s.endsWith("project.clj") => MergeStrategy.concat
       case s if s.endsWith(".html") => MergeStrategy.last
       case x => old(x)
-    }}
+    }},
+    parallelExecution in Test := false
   )
 
   lazy val ganitha = Project(
